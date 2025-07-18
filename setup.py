@@ -40,8 +40,8 @@ def get_extensions():
     this_dir = os.path.dirname(os.path.curdir)
     extensions_dir = os.path.join(this_dir, LIBRARY_NAME, "csrc")
     sources = (
-        list(glob.glob(os.path.join(extensions_dir, "*.cpp"))) +
-        list(glob.glob(os.path.join(extensions_dir, "*.cu"))))
+        list(glob.glob(os.path.join(extensions_dir, "**", "*.cpp"), recursive=True)) +
+        list(glob.glob(os.path.join(extensions_dir, "**", "*.cu"), recursive=True)))
 
     include_dirs = [
         os.path.join(this_dir, "cutlass/include"),
