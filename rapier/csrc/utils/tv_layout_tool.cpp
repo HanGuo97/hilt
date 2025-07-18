@@ -35,23 +35,23 @@ extern "C" {
 
 // Helper struct to hold layout parameters
 struct LayoutParams {
-    int tiler_m, tiler_n;
-    int thr_shape_m, thr_shape_n;
-    int val_shape_m, val_shape_n;
-    int thr_stride_m, thr_stride_n;
-    int val_stride_m, val_stride_n;
+    int64_t tiler_m     , tiler_n;
+    int64_t thr_shape_m , thr_shape_n;
+    int64_t val_shape_m , val_shape_n;
+    int64_t thr_stride_m, thr_stride_n;
+    int64_t val_stride_m, val_stride_n;
 };
 
 // Create and validate layout parameters
 LayoutParams create_layout_params(
-    int tiler_m     , int tiler_n,
-    int thr_shape_m , int thr_shape_n,
-    int val_shape_m , int val_shape_n,
-    int thr_stride_m, int thr_stride_n,
-    int val_stride_m, int val_stride_n
+    int64_t tiler_m     , int64_t tiler_n,
+    int64_t thr_shape_m , int64_t thr_shape_n,
+    int64_t val_shape_m , int64_t val_shape_n,
+    int64_t thr_stride_m, int64_t thr_stride_n,
+    int64_t val_stride_m, int64_t val_stride_n
 ) {
     // Input validation
-    if (tiler_m <= 0 || tiler_n <= 0 ||
+    if (tiler_m     <= 0 || tiler_n     <= 0 ||
         thr_shape_m <= 0 || thr_shape_n <= 0 ||
         val_shape_m <= 0 || val_shape_n <= 0 ||
         thr_stride_m < 0 || thr_stride_n < 0 ||
@@ -69,7 +69,7 @@ LayoutParams create_layout_params(
 // Generate layout configuration message
 std::string generate_layout_message(const LayoutParams& params, const std::exception* e = nullptr) {
     std::ostringstream oss;
-    
+
     // Always print configuration
     oss << "% Layout Configuration:\n"
         << "% Tiler: (" << params.tiler_m << ", " << params.tiler_n << ")\n"
@@ -78,7 +78,7 @@ std::string generate_layout_message(const LayoutParams& params, const std::excep
         << "% Value Shape: (" << params.val_shape_m << ", " << params.val_shape_n << ")\n"
         << "% Value Stride: (" << params.val_stride_m << ", " << params.val_stride_n << ")\n"
         << "% Copy Size: 128 bits (16 bytes)\n";
-    
+
     // Add error message if provided
     if (e) {
         oss << "% Error generating tiled copy layout: " << e->what() << "\n";
@@ -89,39 +89,30 @@ std::string generate_layout_message(const LayoutParams& params, const std::excep
 
 // Create CuTe tiled copy and generate LaTeX
 std::string create_tiled_copy_latex(const LayoutParams& params) {
-    // Create thread layout
-    auto thread_layout = make_layout(
-        make_shape(params.thr_shape_m, params.thr_shape_n),
-        make_stride(params.thr_stride_m, params.thr_stride_n)
-    );
-    
-    // Create value layout
-    auto value_layout = make_layout(
-        make_shape(params.val_shape_m, params.val_shape_n),
-        make_stride(params.val_stride_m, params.val_stride_n)
-    );
-    
-    // Create TV layout by combining thread and value layouts
-    auto tv_layout_cute = make_layout(
-        make_shape(get_shape(thread_layout), get_shape(value_layout)),
-        make_stride(get_stride(thread_layout), get_stride(value_layout))
-    );
-    
+
     // Create tiler layout
-    auto tiler_layout = make_layout(
+    auto tiler_mn = make_layout(
         make_shape(params.tiler_m, params.tiler_n)
     );
-    
+
+    // Create TV layout by combining thread and value layouts
+    auto layout_tv = make_layout(
+        make_shape (make_shape (params.thr_shape_m , params.thr_shape_n ),
+                    make_shape (params.val_shape_m , params.val_shape_n )),
+        make_stride(make_stride(params.thr_stride_m, params.thr_stride_n),
+                    make_stride(params.val_stride_m, params.val_stride_n))
+    );
+
     // Create copy atom with 128-bit (16 bytes) copy operation
     using CopyOp = UniversalCopy<uint_byte_t<16>>;
     using Atom = Copy_Atom<CopyOp, Element>;
-    auto tiled_copy = make_tiled_copy_impl(Atom{}, tv_layout_cute, tiler_layout);
-    
+    auto tiled_copy = make_tiled_copy_impl(Atom{}, tiler_mn, layout_tv);
+
     // Capture LaTeX output
     std::ostringstream oss;
     std::streambuf* orig = std::cout.rdbuf();
     std::cout.rdbuf(oss.rdbuf());
-    
+
     print_latex(tiled_copy);
     
     std::cout.rdbuf(orig);
@@ -130,24 +121,30 @@ std::string create_tiled_copy_latex(const LayoutParams& params) {
 
 // Main function to visualize TV layout with separate parameters
 std::string visualize_layout_tv(
-    int tiler_m, int tiler_n,
-    int thr_shape_m, int thr_shape_n, int val_shape_m, int val_shape_n,
-    int thr_stride_m, int thr_stride_n, int val_stride_m, int val_stride_n
+    int64_t tiler_m     , int64_t tiler_n,
+    int64_t thr_shape_m , int64_t thr_shape_n,
+    int64_t val_shape_m , int64_t val_shape_n,
+    int64_t thr_stride_m, int64_t thr_stride_n,
+    int64_t val_stride_m, int64_t val_stride_n
 ) {
     try {
         auto params = create_layout_params(
-            tiler_m, tiler_n,
-            thr_shape_m, thr_shape_n, val_shape_m, val_shape_n,
-            thr_stride_m, thr_stride_n, val_stride_m, val_stride_n
+            tiler_m     , tiler_n,
+            thr_shape_m , thr_shape_n,
+            val_shape_m , val_shape_n,
+            thr_stride_m, thr_stride_n,
+            val_stride_m, val_stride_n
         );
         auto latex_output = create_tiled_copy_latex(params);
         auto config_message = generate_layout_message(params);
         return config_message + latex_output;
     } catch (const std::exception& e) {
         auto params = create_layout_params(
-            tiler_m, tiler_n,
-            thr_shape_m, thr_shape_n, val_shape_m, val_shape_n,
-            thr_stride_m, thr_stride_n, val_stride_m, val_stride_n
+            tiler_m     , tiler_n,
+            thr_shape_m , thr_shape_n,
+            val_shape_m , val_shape_n,
+            thr_stride_m, thr_stride_n,
+            val_stride_m, val_stride_n
         );
         return generate_layout_message(params, &e);
     }
@@ -155,11 +152,11 @@ std::string visualize_layout_tv(
 
 
 std::string visualize_layout_tv_impl(
-    int tiler_m     , int tiler_n,
-    int thr_shape_m , int thr_shape_n,
-    int val_shape_m , int val_shape_n,
-    int thr_stride_m, int thr_stride_n,
-    int val_stride_m, int val_stride_n
+    int64_t tiler_m     , int64_t tiler_n,
+    int64_t thr_shape_m , int64_t thr_shape_n,
+    int64_t val_shape_m , int64_t val_shape_n,
+    int64_t thr_stride_m, int64_t thr_stride_n,
+    int64_t val_stride_m, int64_t val_stride_n
 ) {
     return visualize_layout_tv(
         tiler_m     , tiler_n,
