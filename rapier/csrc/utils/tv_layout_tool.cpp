@@ -33,7 +33,7 @@ extern "C" {
     }
 }
 
-// Helper struct to hold layout parameters
+
 struct LayoutParams {
     int64_t tiler_m     , tiler_n;
     int64_t thr_shape_m , thr_shape_n;
@@ -42,7 +42,7 @@ struct LayoutParams {
     int64_t val_stride_m, val_stride_n;
 };
 
-// Create and validate layout parameters
+
 LayoutParams create_layout_params(
     int64_t tiler_m     , int64_t tiler_n,
     int64_t thr_shape_m , int64_t thr_shape_n,
@@ -50,7 +50,6 @@ LayoutParams create_layout_params(
     int64_t thr_stride_m, int64_t thr_stride_n,
     int64_t val_stride_m, int64_t val_stride_n
 ) {
-    // Input validation
     if (tiler_m     <= 0 || tiler_n     <= 0 ||
         thr_shape_m <= 0 || thr_shape_n <= 0 ||
         val_shape_m <= 0 || val_shape_n <= 0 ||
@@ -66,7 +65,7 @@ LayoutParams create_layout_params(
             val_stride_m, val_stride_n};
 }
 
-// Generate layout configuration message
+
 std::string generate_layout_message(const LayoutParams& params, const std::exception* e = nullptr) {
     std::ostringstream oss;
 
@@ -106,7 +105,7 @@ std::string create_tiled_copy_latex(const LayoutParams& params) {
     // Create copy atom with 128-bit (16 bytes) copy operation
     using CopyOp = UniversalCopy<uint_byte_t<16>>;
     using Atom = Copy_Atom<CopyOp, Element>;
-    auto tiled_copy = make_tiled_copy_impl(Atom{}, tiler_mn, layout_tv);
+    auto tiled_copy = make_tiled_copy_impl(Atom{}, layout_tv, tiler_mn);
 
     // Capture LaTeX output
     std::ostringstream oss;
@@ -119,7 +118,7 @@ std::string create_tiled_copy_latex(const LayoutParams& params) {
     return oss.str();
 }
 
-// Main function to visualize TV layout with separate parameters
+
 std::string visualize_layout_tv(
     int64_t tiler_m     , int64_t tiler_n,
     int64_t thr_shape_m , int64_t thr_shape_n,
