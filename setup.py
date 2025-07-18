@@ -37,7 +37,7 @@ def get_extensions():
     }
 
 
-    this_dir = os.path.dirname(os.path.curdir)
+    this_dir = os.path.dirname(os.path.abspath(__file__))
     extensions_dir = os.path.join(this_dir, LIBRARY_NAME, "csrc")
     sources = (
         list(glob.glob(os.path.join(extensions_dir, "**", "*.cpp"), recursive=True)) +
