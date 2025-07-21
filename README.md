@@ -24,4 +24,4 @@ source = cutedsl_utilities.visualize_layout_tv(
     dtype=torch.float16,
 )
 ```
-[Example](images/layout-tv-example.png)
+![Example](images/layout-tv-example.png)
