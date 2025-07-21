@@ -38,3 +38,10 @@ std::string visualize_layout_tv() {
     std::cout.rdbuf(orig);
     return oss.str();
 }
+
+
+int main() {
+    std::string latex_output = visualize_layout_tv();
+    std::cout << latex_output << std::endl;
+    return 0;
+}
