@@ -11,5 +11,5 @@ setup(
     description="CuTeDSL Utilities",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/HanGuo97/rapier",
+    url="https://github.com/HanGuo97/cutedsl_utilities",
 )
