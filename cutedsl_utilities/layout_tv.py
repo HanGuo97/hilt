@@ -1,5 +1,7 @@
 import os
 import torch
+import tempfile
+import subprocess
 from jinja2 import Environment
 from torch.utils.cpp_extension import load_inline
 
@@ -10,6 +12,7 @@ def visualize_layout_tv(
     dtype: torch.dtype,
     template_path: str | None = None,
     cutlass_path: str | None = None,
+    inline: bool = False,
 ) -> tuple[str, str]:
     """
     Visualize layout using CuTe tiled copy and generate LaTeX output.
@@ -86,13 +89,54 @@ def visualize_layout_tv(
         os.path.join(cutlass_path, "tools/util/include"),
     ]
 
-    # JIT compile using PyTorch
-    module = load_inline(
-        name="tv_layout_tool",
-        cpp_sources=cpp_source,
-        functions=["visualize_layout_tv"],
-        extra_include_paths=include_paths,
-        with_cuda=True,
-    )
+    if inline:
+        # JIT compile using PyTorch
+        module = load_inline(
+            name="tv_layout_tool",
+            cpp_sources=cpp_source,
+            functions=["visualize_layout_tv"],
+            extra_include_paths=include_paths,
+            with_cuda=True,
+        )
+        output = module.visualize_layout_tv()
+    else:
+        output = compile_and_run(
+            code=cpp_source,
+            include_paths=include_paths,
+        )
+    return output, cpp_source
 
-    return module.visualize_layout_tv(), cpp_source
+
+def compile_and_run(code: str, include_paths: list[str]) -> str:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Save source code to temporary file
+        source_file = os.path.join(temp_dir, "temp.cpp")
+        executable_file = os.path.join(temp_dir, "temp")
+
+        with open(source_file, "w") as f:
+            f.write(code)
+
+        # Build nvcc compile command
+        compile_cmd = ["nvcc", "-std=c++17", source_file, "-o", executable_file]
+        for include_path in include_paths:
+            compile_cmd.extend(["-I", include_path])
+        try:
+            subprocess.run(
+                compile_cmd,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Compilation failed: {e.stderr}")
+
+        try:
+            output = subprocess.run(
+                [executable_file],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return output.stdout
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Execution failed: {e.stderr}")
