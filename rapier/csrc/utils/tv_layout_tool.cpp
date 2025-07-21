@@ -12,7 +12,7 @@ std::string create_tiled_copy_latex() {
 
     // Create tiler layout
     auto tiler_mn = make_layout(
-        make_shape({{ tiler_m }}, {{ tiler_n }})
+        make_shape(Int<{{ tiler_m }}>{}, Int<{{ tiler_n }}>{})
     );
 
     // Create TV layout by combining thread and value layouts
