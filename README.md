@@ -15,7 +15,7 @@ pip install -e .
 ```python
 import torch
 import cutedsl_utilities
-source = cutedsl_utilities.visualize_layout_tv(
+latex, source = cutedsl_utilities.visualize_layout_tv(
     tiler_mn=(32, 32),
     layout_tv=(
         ((16,   8), (2,  4)),
