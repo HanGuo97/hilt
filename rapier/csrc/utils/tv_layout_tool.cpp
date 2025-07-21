@@ -7,8 +7,8 @@ using namespace cute;
 
 using Element = {{ element_type }};
 
-// Create CuTe tiled copy and generate LaTeX
-std::string create_tiled_copy_latex() {
+
+std::string visualize_layout_tv() {
 
     // Create tiler layout
     auto tiler_mn = make_layout(
