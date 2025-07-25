@@ -44,8 +44,4 @@ profile-kernel \
 
 ## Example Output - Profile Kernel
 
-The output CSV will contain columns like:
-
-```
-#, Warning Type, Warning Info, Address, SASS, ...
-```
+![Example](images/sample_profile.png)
