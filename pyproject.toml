@@ -4,3 +4,5 @@ requires = [
     "torch",
 ]
 build-backend = "setuptools.build_meta"
+[project.scripts]
+profile-kernel = "tools.profile_kernel:main"

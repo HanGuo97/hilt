@@ -10,7 +10,7 @@ cd cutedsl_utilities
 pip install -e .
 ```
 
-## Example
+## Example - Visualize TV Layout
 
 ```python
 import torch
@@ -25,3 +25,27 @@ latex, source = cutedsl_utilities.visualize_layout_tv(
 )
 ```
 ![Example](images/layout-tv-example.png)
+
+
+# Profile-Kernel
+
+A CLI tool to profile CUDA kernels using NVIDIA Nsight Compute, extract source-level performance information, and automatically highlight performance bottlenecks (e.g. excessive memory access or warp stalls).
+
+## Usage - Profile Kernel
+
+```bash
+profile-kernel \
+  --ncu_path /path/to/ncu \
+  --exe_path /path/to/python \
+  --filepath my_kernel.py \
+  --output_filename output \
+  [--filter access|stall|warning]  # optional
+```
+
+## Example Output - Profile Kernel
+
+The output CSV will contain columns like:
+
+```
+#, Warning Type, Warning Info, Address, SASS, ...
+```
