@@ -4,5 +4,10 @@ requires = [
     "torch",
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "cutedsl_utilities"
+dynamic = ["version"]
+
 [project.scripts]
 profile-kernel = "tools.profile_kernel:main"
