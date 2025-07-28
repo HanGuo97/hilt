@@ -2,6 +2,15 @@
 
 import cutlass.cute as cute
 
+__all__ = [
+    "block",
+    "thread",
+    "thread0",
+    "block0",
+    "printf",
+    "print_tensor",
+]
+
 
 def block(bid: int) -> bool:
     bidx, bidy, bidz = cute.arch.block_idx()
