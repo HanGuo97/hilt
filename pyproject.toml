@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cutedsl_utilities"
-dynamic = ["version"]
+dynamic = ["version", "description", "readme", "dependencies", "urls"]
 
 [project.scripts]
 profile-kernel = "tools.profile_kernel:main"
