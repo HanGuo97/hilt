@@ -28,3 +28,8 @@ def block0() -> bool:
 def printf(*args, tid: int = 0, bid: int = 0, **kwargs) -> None:
     if thread(tid=tid, bid=bid):
         cute.printf(*args, **kwargs)
+
+
+def print_tensor(*args, tid: int = 0, bid: int = 0, **kwargs) -> None:
+    if thread(tid=tid, bid=bid):
+        cute.print_tensor(*args, **kwargs)
