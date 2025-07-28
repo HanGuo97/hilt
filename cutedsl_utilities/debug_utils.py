@@ -25,6 +25,6 @@ def block0() -> bool:
     return block(0)
 
 
-def printf(*args, **kwargs, tid: int = 0, bid: int = 0) -> None:
+def printf(*args, tid: int = 0, bid: int = 0, **kwargs) -> None:
     if thread(tid=tid, bid=bid):
         cute.printf(*args, **kwargs)
