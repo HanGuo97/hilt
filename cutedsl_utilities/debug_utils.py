@@ -39,12 +39,12 @@ def block0() -> bool:
 
 
 @cute.jit
-def printf(*args, tid: int = 0, bid: int = 0, **kwargs) -> None:
+def printf(*args, tid: int = 0, bid: int = 0) -> None:
     if thread(tid=tid, bid=bid):
-        cute.printf(*args, **kwargs)
+        cute.printf(*args)
 
 
 @cute.jit
-def print_tensor(*args, tid: int = 0, bid: int = 0, **kwargs) -> None:
+def print_tensor(tensor: cute.Tensor, tid: int = 0, bid: int = 0) -> None:
     if thread(tid=tid, bid=bid):
-        cute.print_tensor(*args, **kwargs)
+        cute.print_tensor(tensor)
