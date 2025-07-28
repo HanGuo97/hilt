@@ -23,3 +23,8 @@ def thread0() -> bool:
 
 def block0() -> bool:
     return block(0)
+
+
+def printf(*args, **kwargs, tid: int = 0, bid: int = 0) -> None:
+    if thread(tid=tid, bid=bid):
+        cute.printf(*args, **kwargs)
