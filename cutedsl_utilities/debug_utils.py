@@ -1,5 +1,6 @@
 # https://github.com/NVIDIA/cutlass/blob/main/include/cute/util/debug.hpp
 
+import cutlass
 import cutlass.cute as cute
 
 __all__ = [
@@ -45,6 +46,15 @@ def printf(*args, tid: int = 0, bid: int = 0) -> None:
 
 
 @cute.jit
-def print_tensor(tensor: cute.Tensor, tid: int = 0, bid: int = 0) -> None:
+def print_tensor(tensor: cute.Tensor | cute.TensorSSA, tid: int = 0, bid: int = 0) -> None:
     if thread(tid=tid, bid=bid):
-        cute.print_tensor(tensor)
+        if cutlass.const_expr(isinstance(tensor, cute.Tensor)):
+            cute.print_tensor(tensor)
+        elif cutlass.const_expr(isinstance(tensor, cute.TensorSSA)):
+            tensor_rmem = cute.make_fragment(
+                layout_or_shape=tensor.shape,
+                dtype=tensor.dtype)
+            tensor_rmem.store(tensor)
+            cute.print_tensor(tensor_rmem)
+        else:
+            raise NotImplementedError
