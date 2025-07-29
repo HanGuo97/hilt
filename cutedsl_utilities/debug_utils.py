@@ -10,6 +10,8 @@ __all__ = [
     "block0",
     "printf",
     "print_tensor",
+    "print_tensorssa",
+    "runtime_print",
 ]
 
 
@@ -46,15 +48,25 @@ def printf(*args, tid: int = 0, bid: int = 0) -> None:
 
 
 @cute.jit
-def print_tensor(tensor: cute.Tensor | cute.TensorSSA, tid: int = 0, bid: int = 0) -> None:
+def print_tensor(tensor: cute.Tensor, tid: int = 0, bid: int = 0) -> None:
     if thread(tid=tid, bid=bid):
-        if cutlass.const_expr(isinstance(tensor, cute.Tensor)):
-            cute.print_tensor(tensor)
-        elif cutlass.const_expr(isinstance(tensor, cute.TensorSSA)):
-            tensor_rmem = cute.make_fragment(
-                layout_or_shape=tensor.shape,
-                dtype=tensor.dtype)
-            tensor_rmem.store(tensor)
-            cute.print_tensor(tensor_rmem)
-        else:
-            raise NotImplementedError
+        cute.print_tensor(tensor)
+
+
+@cute.jit
+def print_tensorssa(tensor: cute.TensorSSA, tid: int = 0, bid: int = 0) -> None:
+    tensor_rmem = cute.make_fragment(
+        layout_or_shape=tensor.shape,
+        dtype=tensor.dtype)
+    tensor_rmem.store(tensor)
+    print_tensor(tensor_rmem, tid=tid, bid=bid)
+
+
+@cute.jit
+def runtime_print(x: cute.Tensor | cute.TensorSSA | object, tid: int = 0, bid: int = 0) -> None:
+    if cutlass.const_expr(isinstance(x, cute.Tensor)):
+        print_tensor(x, tid=tid, bid=bid)
+    elif cutlass.const_expr(isinstance(x, cute.TensorSSA)):
+        print_tensorssa(x, tid=tid, bid=bid)
+    else:
+        printf(f"Type: {type(x)}\t" + "Value: {}", x, tid=tid, bid=bid)

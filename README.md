@@ -45,3 +45,15 @@ profile-kernel \
 ## Example Output - Profile Kernel
 
 ![Example](images/sample_profile.png)
+
+## Printing Utilities
+```python
+runtime_print(x: cute.Tensor | cute.TensorSSA | object, tid: int = 0, bid: int = 
+0) -> None
+    """
+    Debug printing function that handles different object types:
+    - cute.Tensor: Uses print_tensor()
+    - cute.TensorSSA: Converts to fragment then prints
+    - Other objects: Prints type and value
+    """
+```
