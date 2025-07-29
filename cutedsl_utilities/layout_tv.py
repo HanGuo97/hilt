@@ -10,6 +10,7 @@ def visualize_layout_tv(
     tiler_mn: tuple[int, int],
     layout_tv: tuple[tuple[tuple[int, int], tuple[int, int]], tuple[tuple[int, int], tuple[int, int]]],
     dtype: torch.dtype,
+    copy_bytes: int | None = None,
     template_path: str | None = None,
     cutlass_path: str | None = None,
     inline: bool = False,
@@ -20,7 +21,7 @@ def visualize_layout_tv(
     Args:
         tiler_mn: Tiler dimensions (m, n)
         layout_tv: Thread-value layout specification
-        element_type: CuTe element type (e.g., "cute::half_t")
+        dtype: PyTorch dtype
         copy_bytes: Copy operation size in bytes (e.g., 16)
         template_path: Optional path to the template file
         cutlass_base_dir: Optional CUTLASS base directory
@@ -31,13 +32,13 @@ def visualize_layout_tv(
 
     if dtype == torch.float16:
         element_type = "cute::half_t"
-        copy_bytes = 16
+        element_bytes = 16
     elif dtype == torch.bfloat16:
         element_type = "cute::bfloat16_t"
-        copy_bytes = 16
+        element_bytes = 16
     elif dtype == torch.float32:
         element_type = "float"
-        copy_bytes = 32
+        element_bytes = 32
     else:
         raise NotImplementedError
 
@@ -81,7 +82,7 @@ def visualize_layout_tv(
         thr_stride_n=thr_stride_n,
         val_stride_m=val_stride_m,
         val_stride_n=val_stride_n,
-        copy_bytes=copy_bytes,
+        copy_bytes=copy_bytes if copy_bytes is not None else element_bytes,
     )
 
     include_paths = [
