@@ -7,9 +7,9 @@ Tensor = cute.Tensor | cute.TensorSSA | Scalar
 
 
 def make_dispatch_function(
-    fn_tensor: Callable[[cute.Tensor], cute.Tensor],
-    fn_tensorssa: Callable[[cute.TensorSSA], cute.TensorSSA],
-    fn_scalar: Callable[[Scalar], Scalar],
+    fn_tensor: Callable[[cute.Tensor], cute.Tensor] | None = None,
+    fn_tensorssa: Callable[[cute.TensorSSA], cute.TensorSSA] | None = None,
+    fn_scalar: Callable[[Scalar], Scalar] | None = None,
 ) -> Callable[[Tensor], Tensor]:
     """Creates a function that dispatches to appropriate function based on input type.
     
@@ -21,11 +21,20 @@ def make_dispatch_function(
 
     def _dispatcher(x: Tensor) -> Tensor:
         if cutlass.const_expr(isinstance(x, cute.Tensor)):
-            return fn_tensor(x)
+            if cutlass.const_expr(fn_tensor is not None):
+                return fn_tensor(x)
+            else:
+                raise NotImplementedError
         if cutlass.const_expr(isinstance(x, cute.TensorSSA)):
-            return fn_tensorssa(x)
+            if cutlass.const_expr(fn_tensorssa is not None):
+                return fn_tensorssa(x)
+            else:
+                raise NotImplementedError
         if cutlass.const_expr(isinstance(x, Scalar)):
-            return fn_scalar(x)
+            if cutlass.const_expr(fn_scalar is not None):
+                return fn_scalar(x)
+            else:
+                raise NotImplementedError
         raise NotImplementedError
 
     return _dispatcher
