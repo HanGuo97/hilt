@@ -1,5 +1,7 @@
 import cutlass
 import cutlass.cute as cute
+from cutlass.cutlass_dsl import T, dsl_user_op
+from cutlass._mlir.dialects import llvm
 from collections.abc import Callable
 
 Scalar = cute.Numeric | cutlass.cutlass_dsl.cutlass_arith.ArithValue
@@ -62,7 +64,29 @@ exp2 = make_dispatch_function(
 )
 
 
-exp2 = make_dispatch_function(
+exp = make_dispatch_function(
     fn_tensorssa=make_tensorssa_fn_from_scalar_fn(cute.arch.exp),
     fn_scalar=cute.arch.exp,
+)
+
+
+@dsl_user_op
+def rsqrt(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
+    assert cutlass.const_expr(isinstance(a, float | cute.Float32))
+    return cute.Float32(
+        llvm.inline_asm(
+            T.f32(),
+            [cute.Float32(a).ir_value(loc=loc, ip=ip)],
+            "rsqrt.approx.ftz.f32 $0, $1;",
+            "=f,f",
+            has_side_effects=True,
+            is_align_stack=False,
+            asm_dialect=llvm.AsmDialect.AD_ATT,
+        )
+    )
+
+
+rsqrt = make_dispatch_function(
+    fn_tensorssa=make_tensorssa_fn_from_scalar_fn(rsqrt),
+    fn_scalar=rsqrt,
 )
