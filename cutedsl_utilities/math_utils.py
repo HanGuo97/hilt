@@ -54,3 +54,15 @@ def make_tensorssa_fn_from_scalar_fn(
         return res.load()
 
     return _tensorssa_fn
+
+
+exp2 = make_dispatch_function(
+    fn_tensorssa=cute.math.exp2,
+    fn_scalar=cute.arch.exp2,
+)
+
+
+exp2 = make_dispatch_function(
+    fn_tensorssa=make_tensorssa_fn_from_scalar_fn(cute.arch.exp),
+    fn_scalar=cute.arch.exp,
+)
