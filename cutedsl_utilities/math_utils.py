@@ -7,6 +7,12 @@ from collections.abc import Callable
 Scalar = cute.Numeric | cutlass.cutlass_dsl.cutlass_arith.ArithValue
 Tensor = cute.Tensor | cute.TensorSSA | Scalar
 
+__all__ = [
+    "exp2",
+    "exp",
+    "rsqrt",
+]
+
 
 def make_dispatch_function(
     fn_tensor: Callable[[cute.Tensor], cute.Tensor] | None = None,
