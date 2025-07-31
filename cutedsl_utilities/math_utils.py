@@ -52,6 +52,8 @@ def make_tensorssa_fn_from_scalar_fn(
     fn_scalar: Callable[[Scalar], Scalar],
 ) -> Callable[[cute.TensorSSA], cute.TensorSSA]:
     # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
+
+    @cute.jit
     def _tensorssa_fn(x: cute.TensorSSA) -> cute.TensorSSA:
         res = cute.make_fragment(x.shape, x.dtype)
         res.store(x)
