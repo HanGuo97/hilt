@@ -85,7 +85,7 @@ def rsqrt(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
             [cute.Float32(a).ir_value(loc=loc, ip=ip)],
             "rsqrt.approx.ftz.f32 $0, $1;",
             "=f,f",
-            has_side_effects=True,
+            has_side_effects=False,
             is_align_stack=False,
             asm_dialect=llvm.AsmDialect.AD_ATT,
         )
