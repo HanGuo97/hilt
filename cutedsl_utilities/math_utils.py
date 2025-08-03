@@ -85,6 +85,7 @@ exp = make_dispatch_function(
 
 @dsl_user_op
 def _rsqrt(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
+    # https://github.com/Dao-AILab/quack/blob/main/quack/utils.py
     assert cutlass.const_expr(isinstance(a, float | cute.Float32))
     return cute.Float32(
         llvm.inline_asm(
@@ -107,6 +108,7 @@ rsqrt = make_dispatch_function(
 
 @dsl_user_op
 def _log2(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
+    # https://github.com/Dao-AILab/quack/blob/main/quack/utils.py
     assert cutlass.const_expr(isinstance(a, float | cute.Float32))
     return cute.Float32(
         llvm.inline_asm(
@@ -123,6 +125,7 @@ def _log2(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
 
 @dsl_user_op
 def _log(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
+    # https://github.com/Dao-AILab/quack/blob/main/quack/cross_entropy.py
     return _log2(a, loc=loc, ip=ip) * LOGE_2
 
 
