@@ -1,3 +1,4 @@
+import math
 import cutlass
 import cutlass.cute as cute
 from cutlass.cutlass_dsl import T, dsl_user_op
@@ -11,7 +12,11 @@ __all__ = [
     "exp2",
     "exp",
     "rsqrt",
+    "log2",
+    "log",
 ]
+
+LOGE_2 = math.log(2.0)
 
 
 def make_dispatch_function(
@@ -79,7 +84,7 @@ exp = make_dispatch_function(
 
 
 @dsl_user_op
-def rsqrt(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
+def _rsqrt(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
     assert cutlass.const_expr(isinstance(a, float | cute.Float32))
     return cute.Float32(
         llvm.inline_asm(
@@ -95,6 +100,39 @@ def rsqrt(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
 
 
 rsqrt = make_dispatch_function(
-    fn_tensorssa=make_tensorssa_fn_from_scalar_fn(rsqrt),
-    fn_scalar=rsqrt,
+    fn_tensorssa=make_tensorssa_fn_from_scalar_fn(_rsqrt),
+    fn_scalar=_rsqrt,
+)
+
+
+@dsl_user_op
+def _log2(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
+    assert cutlass.const_expr(isinstance(a, float | cute.Float32))
+    return cute.Float32(
+        llvm.inline_asm(
+            T.f32(),
+            [cute.Float32(a).ir_value(loc=loc, ip=ip)],
+            "lg2.approx.ftz.f32 $0, $1;",
+            "=f,f",
+            has_side_effects=False,
+            is_align_stack=False,
+            asm_dialect=llvm.AsmDialect.AD_ATT,
+        )
+    )
+
+
+@dsl_user_op
+def _log(a: float | cute.Float32, *, loc=None, ip=None) -> cute.Float32:
+    return _log2(a, loc=loc, ip=ip) * LOGE_2
+
+
+log2 = make_dispatch_function(
+    fn_tensorssa=cute.math.log2,
+    fn_scalar=_log2,
+)
+
+
+log = make_dispatch_function(
+    fn_tensorssa=cute.math.log,
+    fn_scalar=_log,
 )
