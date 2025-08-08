@@ -6,7 +6,7 @@ A Python package for CuTeDSL utilities.
 
 ```bash
 git clone --recurse-submodules https://github.com/HanGuo97/cutedsl-utilities
-cd cutedsl_utilities
+cd cutedsl-utilities
 pip install -e .
 ```
 
@@ -57,3 +57,13 @@ runtime_print(x: cute.Tensor | cute.TensorSSA | object, tid: int = 0, bid: int =
     - Other objects: Prints type and value
     """
 ```
+
+## Math Utilities
+We included several math functions in `cutedsl_utilities/math_utils.py` that work with both `cute.TensorSSA` as well as scalar values:
+
+- `exp(x)`
+- `log(x)`
+- `rsqrt(x)`
+- etc
+
+These functions automatically dispatch to the appropriate implementation based on the input type.
