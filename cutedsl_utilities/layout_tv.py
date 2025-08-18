@@ -4,11 +4,21 @@ import tempfile
 import subprocess
 from jinja2 import Environment
 from torch.utils.cpp_extension import load_inline
+from cutedsl_utilities.pycute_utils import idx2crd, crd2idx
+
+TilerMN = tuple[int, int]
+TVShape = tuple[tuple[int, int] | int, tuple[int, int] | int]
+LayoutTV = tuple[TVShape, TVShape]
+
+__all__ = [
+    "visualize_layout_tv",
+    "tiler_crd_to_layout_tv_crd",
+]
 
 
 def visualize_layout_tv(
-    tiler_mn: tuple[int, int],
-    layout_tv: tuple[tuple[tuple[int, int], tuple[int, int]], tuple[tuple[int, int], tuple[int, int]]],
+    tiler_mn: TilerMN,
+    layout_tv: LayoutTV,
     dtype: torch.dtype,
     copy_bytes: int | None = None,
     template_path: str | None = None,
@@ -141,3 +151,23 @@ def compile_and_run(code: str, include_paths: list[str]) -> str:
             return output.stdout
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Execution failed: {e.stderr}")
+
+
+def tiler_crd_to_layout_tv_crd(
+    tiler_crd: TilerMN,
+    tiler_mn: TilerMN,
+    layout_tv_shape: TVShape,
+    layout_tv_stride: TVShape,
+) -> TVShape:
+    assert len(tiler_crd) == 2
+    assert len(tiler_mn) == 2
+    assert len(layout_tv) == 2
+    tiler_idx = crd2idx(
+        crd=tiler_crd,
+        shape=tiler_mn,
+    )
+    return idx2crd(
+        idx=tiler_idx,
+        shape=layout_tv_shape,
+        stride=layout_tv_stride,
+    )
