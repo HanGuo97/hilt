@@ -11,10 +11,14 @@ from pycute.int_tuple import (
     crd2crd,
     slice_,
 )
+from pycute.layout import (
+    Layout,
+)
 
 __all__ = [
     "idx2crd",
     "crd2idx",
     "crd2crd",
     "slice_",
+    "Layout",
 ]
