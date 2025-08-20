@@ -34,6 +34,7 @@ def visualize_layout_tv(
     return visualize_layout(
         layout=tiler_layout,
         label_map=label_map,
+        **kwargs
     )
 
 
