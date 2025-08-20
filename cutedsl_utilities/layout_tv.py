@@ -161,7 +161,8 @@ def tiler_crd_to_layout_tv_crd(
 ) -> TVShape:
     assert len(tiler_crd) == 2
     assert len(tiler_mn) == 2
-    assert len(layout_tv) == 2
+    assert len(layout_tv_shape) == 2
+    assert len(layout_tv_stride) == 2
     tiler_idx = crd2idx(
         crd=tiler_crd,
         shape=tiler_mn,
