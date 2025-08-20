@@ -30,6 +30,7 @@ __all__ = [
 
 
 def default_color_map(index: int) -> tuple[float, float, float]:
+    # https://github.com/NVIDIA/cutlass/blob/main/include/cute/util/print_latex.hpp
     colors = plt.cm.tab20c.colors[:16]
     return colors[index % len(colors)]
 
@@ -40,6 +41,7 @@ def visualize_layout(
     **kwargs,
 ) -> tuple[plt.Figure, plt.Axes]:
     # https://github.com/NVIDIA/cutlass/blob/main/include/cute/util/print_latex.hpp
+
     if color_map is None:
         color_map = default_color_map
 
