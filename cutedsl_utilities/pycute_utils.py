@@ -39,7 +39,7 @@ def visualize_layout(
     color_map: Callable[[int], object] | None = None,
     **kwargs,
 ) -> tuple[plt.Figure, plt.Axes]:
-
+    # https://github.com/NVIDIA/cutlass/blob/main/include/cute/util/print_latex.hpp
     if color_map is None:
         color_map = default_color_map
 
