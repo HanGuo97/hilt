@@ -35,15 +35,22 @@ def default_color_map(index: int) -> tuple[float, float, float]:
     return colors[index % len(colors)]
 
 
+def default_label_map(index: int) -> str:
+    return str(index)
+
+
 def visualize_layout(
     layout: Layout,
     color_map: Callable[[int], object] | None = None,
+    label_map: Callable[[int], str] | None = None,
     **kwargs,
 ) -> tuple[plt.Figure, plt.Axes]:
     # https://github.com/NVIDIA/cutlass/blob/main/include/cute/util/print_latex.hpp
 
     if color_map is None:
         color_map = default_color_map
+    if label_map is None:
+        label_map = default_label_map
 
     if len(layout.shape) == 1:
         M = product(layout.shape[0])
@@ -66,8 +73,9 @@ def visualize_layout(
             else:
                 raise NotImplementedError
 
-            # Get color for this index
+            # Get color and label for this index
             color = color_map(index)
+            label = label_map(index)
 
             # Draw rectangle with color
             rect = plt.Rectangle(
@@ -84,7 +92,7 @@ def visualize_layout(
             ax.text(
                 n + 0.5,
                 M - m - 0.5,
-                str(index),
+                label,
                 ha="center",
                 va="center",
                 fontsize=12,
