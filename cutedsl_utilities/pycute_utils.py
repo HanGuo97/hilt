@@ -8,6 +8,7 @@ cutlass_python_path = Path(__file__).parent.parent / "cutlass" / "python"
 sys.path.append(str(cutlass_python_path))
 
 from pycute.int_tuple import (
+    product,
     idx2crd,
     crd2idx,
     crd2crd,
@@ -18,6 +19,7 @@ from pycute.layout import (
 )
 
 __all__ = [
+    "product",
     "idx2crd",
     "crd2idx",
     "crd2crd",
@@ -42,11 +44,11 @@ def visualize_layout(
         color_map = default_color_map
 
     if len(layout.shape) == 1:
-        M = layout.shape[0]
+        M = product(layout.shape[0])
         N = 1
     elif len(layout.shape) == 2:
-        M = layout.shape[0]
-        N = layout.shape[1]
+        M = product(layout.shape[0])
+        N = product(layout.shape[1])
     else:
         raise NotImplementedError
 
