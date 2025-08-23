@@ -3,6 +3,7 @@ from cutedsl_utilities.pycute_utils import (
     Layout,
     idx2crd,
     crd2idx,
+    product,
     visualize_layout,
 )
 
@@ -42,10 +43,13 @@ def visualize_layout_tv(
         )
         return thr_crd, val_crd, thr_idx, val_idx
 
-    def color_map(index: int) -> tuple[float, float, float]:
-        _, _, thr_idx, _ = get_crd_and_idx(index)
+    def color_map(index: int) -> tuple[float, float, float, float]:
+        _, _, thr_idx, val_idx = get_crd_and_idx(index)
         colors = plt.cm.Set2.colors
-        return colors[thr_idx % len(colors)]
+        rgb = colors[thr_idx % len(colors)]
+        vals = product(layout_tv.shape[1])
+        alpha = (vals - val_idx) / vals
+        return *rgb, alpha
 
     def label_map(index: int) -> str:
         thr_crd, val_crd, thr_idx, val_idx = get_crd_and_idx(index)
