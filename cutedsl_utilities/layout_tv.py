@@ -20,6 +20,7 @@ __all__ = [
 def visualize_layout_tv(
     tiler_mn: TilerMN,
     layout_tv: Layout,
+    use_alpha: bool = False,
     use_index: bool = False,
     **kwargs,
 ) -> tuple[plt.Figure, plt.Axes]:
@@ -47,8 +48,11 @@ def visualize_layout_tv(
         _, _, thr_idx, val_idx = get_crd_and_idx(index)
         colors = plt.cm.Set2.colors
         rgb = colors[thr_idx % len(colors)]
-        vals = product(layout_tv.shape[1])
-        alpha = (vals - val_idx) / vals
+        if use_alpha:
+            vals = product(layout_tv.shape[1])
+            alpha = (vals - val_idx) / vals
+        else:
+            alpha = 1.0
         return *rgb, alpha
 
     def label_map(index: int) -> str:
