@@ -12,11 +12,11 @@ from pycute.int_tuple import (
     idx2crd,
     crd2idx,
     crd2crd,
-    coalesce,
     slice_,
 )
 from pycute.layout import (
     Layout,
+    coalesce,
 )
 
 __all__ = [
