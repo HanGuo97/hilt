@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from collections import defaultdict
 from cutedsl_utilities.pycute_utils import (
     Layout,
     idx2crd,
@@ -61,6 +62,68 @@ def visualize_layout_tv(
             return f"T: {thr_crd}\nV: {val_crd}"
         else:
             return f"T: {thr_idx}\nV: {val_idx}"
+
+    tiler_layout = Layout(tiler_mn)
+    return visualize_layout(
+        layout=tiler_layout,
+        color_map=color_map,
+        label_map=label_map,
+        **kwargs
+    )
+
+
+def visualize_layout_tv_maybe_duplicates(
+    tiler_mn: TilerMN,
+    layout_tv: Layout,
+    use_alpha: bool = False,
+    use_index: bool = False,
+    **kwargs,
+) -> tuple[plt.Figure, plt.Axes]:
+
+    assert len(layout_tv.shape) == 2
+    assert len(layout_tv.stride) == 2
+    thr_shape, val_shape = layout_tv.shape
+    inverse_tv = defaultdict(list)
+    for thr_idx in range(product(thr_shape)):
+        thr_crd = idx2crd(
+            idx=thr_idx,
+            shape=thr_shape,
+        )
+        for val_idx in range(product(val_shape)):
+            val_crd = idx2crd(
+                idx=val_idx,
+                shape=val_shape,
+            )
+            index = layout_tv(thr_idx, val_idx)
+            inverse_tv[index].append((thr_crd, val_crd, thr_idx, val_idx))
+
+    def color_map(index: int) -> tuple[float, float, float, float]:
+        # using the first entry to decide color
+        _, _, thr_idx, val_idx = inverse_tv[index][0]
+        colors = plt.cm.Set2.colors
+        rgb = colors[thr_idx % len(colors)]
+        if use_alpha:
+            vals = product(layout_tv.shape[1])
+            alpha = (vals - val_idx) / vals
+        else:
+            alpha = 1.0
+        return *rgb, alpha
+
+    def label_map(index: int) -> str:
+        thr_crds = []
+        val_crds = []
+        thr_idxs = []
+        val_idxs = []
+        for thr_crd, val_crd, thr_idx, val_idx in inverse_tv[index]:
+            thr_crds.append(str(thr_crd))
+            val_crds.append(str(val_crd))
+            thr_idxs.append(str(thr_idx))
+            val_idxs.append(str(val_idx))
+
+        if not use_index:
+            return f"T: {' | '.join(thr_crds)}\nV: {' | '.join(val_crds)}"
+        else:
+            return f"T: {' | '.join(thr_idxs)}\nV: {' | '.join(val_idxs)}"
 
     tiler_layout = Layout(tiler_mn)
     return visualize_layout(
