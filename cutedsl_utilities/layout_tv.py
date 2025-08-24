@@ -14,6 +14,7 @@ LayoutTV = tuple[TVShape, TVShape]
 
 __all__ = [
     "visualize_layout_tv",
+    "visualize_layout_tv_maybe_duplicates",
     "tiler_crd_to_layout_tv_crd",
 ]
 
