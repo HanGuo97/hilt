@@ -99,9 +99,10 @@ def visualize_layout_tv_maybe_duplicates(
             inverse_tv[index].append((thr_crd, val_crd, thr_idx, val_idx))
 
     def color_map(index: int) -> tuple[float, float, float, float]:
-        # using the first entry to decide color
         if len(inverse_tv[index]) == 0:
             return 1.0, 1.0, 1.0, 0.0
+
+        # using the first entry to decide color
         _, _, thr_idx, val_idx = inverse_tv[index][0]
         colors = plt.cm.Set2.colors
         rgb = colors[thr_idx % len(colors)]
@@ -113,6 +114,9 @@ def visualize_layout_tv_maybe_duplicates(
         return *rgb, alpha
 
     def label_map(index: int) -> str:
+        if len(inverse_tv[index]) == 0:
+            return ""
+
         thr_crds = []
         val_crds = []
         thr_idxs = []
