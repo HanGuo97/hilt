@@ -100,6 +100,8 @@ def visualize_layout_tv_maybe_duplicates(
 
     def color_map(index: int) -> tuple[float, float, float, float]:
         # using the first entry to decide color
+        if len(inverse_tv[index]) == 0:
+            return 1.0, 1.0, 1.0, 0.0
         _, _, thr_idx, val_idx = inverse_tv[index][0]
         colors = plt.cm.Set2.colors
         rgb = colors[thr_idx % len(colors)]
