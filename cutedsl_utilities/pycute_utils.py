@@ -54,7 +54,10 @@ def visualize_layout(
     if label_map is None:
         label_map = default_label_map
 
-    if len(layout.shape) == 1:
+    if isinstance(layout.shape, int):
+        M = layout.shape
+        N = 1
+    elif len(layout.shape) == 1:
         M = product(layout.shape[0])
         N = 1
     elif len(layout.shape) == 2:
@@ -68,7 +71,9 @@ def visualize_layout(
 
     for m in range(M):
         for n in range(N):
-            if len(layout.shape) == 1:
+            if isinstance(layout.shape, int):
+                index = layout(m)
+            elif len(layout.shape) == 1:
                 index = layout(m)
             elif len(layout.shape) == 2:
                 index = layout(m, n)
