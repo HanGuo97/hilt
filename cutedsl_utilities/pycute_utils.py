@@ -11,6 +11,7 @@ sys.path.append(str(cutlass_python_path))
 from pycute.int_tuple import (
     slice_,
     product,
+    flatten,
     idx2crd,
     crd2idx,
     crd2crd,
@@ -29,6 +30,7 @@ __all__ = [
     "filter",
     "filter2",
     "product",
+    "flatten",
     "idx2crd",
     "crd2idx",
     "crd2crd",
