@@ -1,6 +1,7 @@
 import sys
 import matplotlib.pyplot as plt
 from pathlib import Path
+from itertools import chain
 from collections.abc import Callable
 
 # Add cutlass python path for pycute import
@@ -8,25 +9,31 @@ cutlass_python_path = Path(__file__).parent.parent / "cutlass" / "python"
 sys.path.append(str(cutlass_python_path))
 
 from pycute.int_tuple import (
+    slice_,
+    filter,
+    filter2,
     product,
     idx2crd,
     crd2idx,
     crd2crd,
-    slice_,
 )
 from pycute.layout import (
     Layout,
     coalesce,
+    is_tuple,
+    make_layout,
 )
 
 __all__ = [
+    "Layout",
+    "slice_",
     "product",
     "idx2crd",
     "crd2idx",
     "crd2crd",
     "coalesce",
-    "slice_",
-    "Layout",
+    "is_tuple",
+    "make_layout",
     "visualize_layout",
 ]
 
@@ -138,3 +145,15 @@ def visualize_layout(
 
     plt.tight_layout()
     return fig, ax
+
+
+def filter2(layout: Layout, profile: tuple | None = None) -> Layout:
+    """A variant of `filter` that only applies filtering to the last few entries of a layout."""
+    if is_tuple(profile):
+        assert len(layout) >= len(profile)
+        length = len(layout) - len(profile)
+        prefix = (layout[i]                              for i in range(length             ))
+        suffix = (filter(layout[i], profile[i - length]) for i in range(length, len(layout)))
+        return make_layout(chain(prefix, suffix))
+
+    return filter(layout=layout, profile=profile)
