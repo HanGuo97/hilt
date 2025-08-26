@@ -10,8 +10,6 @@ sys.path.append(str(cutlass_python_path))
 
 from pycute.int_tuple import (
     slice_,
-    filter,
-    filter2,
     product,
     idx2crd,
     crd2idx,
@@ -19,6 +17,7 @@ from pycute.int_tuple import (
 )
 from pycute.layout import (
     Layout,
+    filter,
     coalesce,
     is_tuple,
     make_layout,
@@ -27,6 +26,8 @@ from pycute.layout import (
 __all__ = [
     "Layout",
     "slice_",
+    "filter",
+    "filter2",
     "product",
     "idx2crd",
     "crd2idx",
@@ -150,10 +151,11 @@ def visualize_layout(
 def filter2(layout: Layout, profile: tuple | None = None) -> Layout:
     """A variant of `filter` that only applies filtering to the last few entries of a layout."""
     if is_tuple(profile):
-        assert len(layout) >= len(profile)
-        length = len(layout) - len(profile)
-        prefix = (layout[i]                              for i in range(length             ))
-        suffix = (filter(layout[i], profile[i - length]) for i in range(length, len(layout)))
-        return make_layout(chain(prefix, suffix))
+        assert len(layout) == len(profile)
+        return make_layout(
+            filter(layout=l, profile=p)
+            if p is not None else l
+            for l, p in zip(layout, profile)
+        )
 
     return filter(layout=layout, profile=profile)
