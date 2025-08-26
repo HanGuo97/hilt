@@ -13,6 +13,7 @@ TVShape = tuple[tuple[int, int] | int, tuple[int, int] | int]
 LayoutTV = tuple[TVShape, TVShape]
 
 __all__ = [
+    "make_inverse_tv",
     "visualize_layout_tv",
     "visualize_layout_tv_maybe_duplicates",
     "tiler_crd_to_layout_tv_crd",
