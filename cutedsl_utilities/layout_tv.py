@@ -129,7 +129,7 @@ def visualize_layout_tv_maybe_duplicates(
     )
 
 
-def make_inverse_tv(layout_tv: Layout) -> dict[int, tuple[tuple[int, ...], tuple[int, ...], int, int]]:
+def make_inverse_tv(layout_tv: Layout) -> dict[int, list[tuple[tuple[int, ...], tuple[int, ...], int, int]]]:
     thr_shape, val_shape = layout_tv.shape
     inverse_tv = defaultdict(list)
     for thr_idx in range(product(thr_shape)):
