@@ -83,20 +83,7 @@ def visualize_layout_tv_maybe_duplicates(
 
     assert len(layout_tv.shape) == 2
     assert len(layout_tv.stride) == 2
-    thr_shape, val_shape = layout_tv.shape
-    inverse_tv = defaultdict(list)
-    for thr_idx in range(product(thr_shape)):
-        thr_crd = idx2crd(
-            idx=thr_idx,
-            shape=thr_shape,
-        )
-        for val_idx in range(product(val_shape)):
-            val_crd = idx2crd(
-                idx=val_idx,
-                shape=val_shape,
-            )
-            index = layout_tv(thr_idx, val_idx)
-            inverse_tv[index].append((thr_crd, val_crd, thr_idx, val_idx))
+    inverse_tv = make_inverse_tv(layout_tv)
 
     def color_map(index: int) -> tuple[float, float, float, float]:
         if len(inverse_tv[index]) == 0:
@@ -139,6 +126,24 @@ def visualize_layout_tv_maybe_duplicates(
         label_map=label_map,
         **kwargs
     )
+
+
+def make_inverse_tv(layout_tv: Layout) -> dict[int, tuple[int, int, int, int]]:
+    thr_shape, val_shape = layout_tv.shape
+    inverse_tv = defaultdict(list)
+    for thr_idx in range(product(thr_shape)):
+        thr_crd = idx2crd(
+            idx=thr_idx,
+            shape=thr_shape,
+        )
+        for val_idx in range(product(val_shape)):
+            val_crd = idx2crd(
+                idx=val_idx,
+                shape=val_shape,
+            )
+            index = layout_tv(thr_idx, val_idx)
+            inverse_tv[index].append((thr_crd, val_crd, thr_idx, val_idx))
+    return inverse_tv
 
 
 def tiler_crd_to_layout_tv_crd(
