@@ -1,7 +1,9 @@
 import sys
 import matplotlib.pyplot as plt
 from pathlib import Path
+from typing import Self
 from itertools import chain
+from collections import defaultdict
 from collections.abc import Callable
 
 # Add cutlass python path for pycute import
@@ -15,17 +17,23 @@ from pycute.int_tuple import (
     idx2crd,
     crd2idx,
     crd2crd,
+    has_none,
 )
 from pycute.layout import (
     Layout,
+    LayoutBase,
     filter,
     coalesce,
     is_tuple,
     make_layout,
 )
 
+IntTuple = int | tuple["IntTuple", ...]
+
+
 __all__ = [
     "Layout",
+    "MultiLayout",
     "slice_",
     "filter",
     "filter2",
@@ -34,6 +42,7 @@ __all__ = [
     "idx2crd",
     "crd2idx",
     "crd2crd",
+    "has_none",
     "coalesce",
     "is_tuple",
     "make_layout",
@@ -161,3 +170,48 @@ def filter2(layout: Layout, profile: tuple | None = None) -> Layout:
         )
 
     return filter(layout=layout, profile=profile)
+
+
+class MultiLayout(LayoutBase):
+
+    def __init__(
+        self,
+        _shape: IntTuple,
+        _idx_fn: Callable[[int], list[int]] | None = None,
+        _crd_fn: Callable[[IntTuple], list[int]] | None = None,
+    ) -> None:
+        if _idx_fn is not None and _crd_fn is None:
+            def _fn(crd: IntTuple) -> int:
+                idx = crd2idx(crd=crd, shape=_shape)
+                return _idx_fn(idx)
+        elif _idx_fn is None and _crd_fn is not None:
+            _fn = _crd_fn
+        else:
+            raise ValueError
+
+        self.fn = _fn
+        self.shape = _shape
+
+    @property
+    def stride(self) -> IntTuple:
+        raise NotImplementedError
+
+    def __call__(self, *args) -> list[int]:
+        if has_none(args):
+            raise NotImplementedError
+        else:
+            if len(args) == 1:
+                return self.fn(args[0])
+            else:
+                return self.fn(args)
+
+    @classmethod
+    def from_inverse(cls: type[Self], layout: Layout) -> Self:
+        data = defaultdict(list)
+        for src_idx in range(layout.size()):
+            tgt_idx = layout(src_idx)
+            data[tgt_idx].append(src_idx)
+        return cls(
+            _shape=layout.shape,
+            _idx_fn=lambda idx: data[idx],
+        )
