@@ -11,6 +11,7 @@ from cutedsl_utilities.pycute_utils import (
 TilerMN = tuple[int, int]
 TVShape = tuple[tuple[int, int] | int, tuple[int, int] | int]
 LayoutTV = tuple[TVShape, TVShape]
+InverseTVEntry = tuple[tuple[int, ...], tuple[int, ...], int, int]
 
 __all__ = [
     "make_inverse_tv",
@@ -30,25 +31,10 @@ def visualize_layout_tv(
 
     assert len(layout_tv.shape) == 2
     assert len(layout_tv.stride) == 2
-
-    def get_crd_and_idx(index: int) -> tuple[tuple[int, ...], tuple[int, ...], int, int]:
-        thr_crd, val_crd = idx2crd(
-            idx=index,
-            shape=layout_tv.shape,
-            stride=layout_tv.stride,
-        )
-        thr_idx = crd2idx(
-            crd=thr_crd,
-            shape=layout_tv.shape[0],
-        )
-        val_idx = crd2idx(
-            crd=val_crd,
-            shape=layout_tv.shape[1],
-        )
-        return thr_crd, val_crd, thr_idx, val_idx
+    inverse_tv = make_inverse_tv(layout_tv, maybe_duplicates=False)
 
     def color_map(index: int) -> tuple[float, float, float, float]:
-        _, _, thr_idx, val_idx = get_crd_and_idx(index)
+        _, _, thr_idx, val_idx = inverse_tv[index]
         colors = plt.cm.Set2.colors
         rgb = colors[thr_idx % len(colors)]
         if use_alpha:
@@ -59,7 +45,7 @@ def visualize_layout_tv(
         return *rgb, alpha
 
     def label_map(index: int) -> str:
-        thr_crd, val_crd, thr_idx, val_idx = get_crd_and_idx(index)
+        thr_crd, val_crd, thr_idx, val_idx = inverse_tv[index]
         if not use_index:
             return f"T: {thr_crd}\nV: {val_crd}"
         else:
@@ -84,7 +70,7 @@ def visualize_layout_tv_maybe_duplicates(
 
     assert len(layout_tv.shape) == 2
     assert len(layout_tv.stride) == 2
-    inverse_tv = make_inverse_tv(layout_tv)
+    inverse_tv = make_inverse_tv(layout_tv, maybe_duplicates=True)
 
     def color_map(index: int) -> tuple[float, float, float, float]:
         if len(inverse_tv[index]) == 0:
@@ -129,9 +115,14 @@ def visualize_layout_tv_maybe_duplicates(
     )
 
 
-def make_inverse_tv(layout_tv: Layout) -> dict[int, list[tuple[tuple[int, ...], tuple[int, ...], int, int]]]:
+def make_inverse_tv(layout_tv: Layout, maybe_duplicates: bool) -> dict[int, InverseTVEntry | list[InverseTVEntry]]:
     thr_shape, val_shape = layout_tv.shape
-    inverse_tv = defaultdict(list)
+
+    if not maybe_duplicates:
+        inverse_tv = {}
+    else:
+        inverse_tv = defaultdict(list)
+
     for thr_idx in range(product(thr_shape)):
         thr_crd = idx2crd(
             idx=thr_idx,
@@ -143,7 +134,13 @@ def make_inverse_tv(layout_tv: Layout) -> dict[int, list[tuple[tuple[int, ...], 
                 shape=val_shape,
             )
             index = layout_tv(thr_idx, val_idx)
-            inverse_tv[index].append((thr_crd, val_crd, thr_idx, val_idx))
+            entry = (thr_crd, val_crd, thr_idx, val_idx)
+            if not maybe_duplicates:
+                assert index not in inverse_tv.keys()
+                inverse_tv[index] = entry
+            else:
+                inverse_tv[index].append(entry)
+
     return inverse_tv
 
 
