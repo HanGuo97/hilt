@@ -24,6 +24,7 @@ __all__ = [
 def visualize_layout_tv(
     tiler_mn: TilerMN,
     layout_tv: Layout,
+    inverse_tv: dict[int, InverseTVEntry] | None = None,
     use_alpha: bool = False,
     use_index: bool = False,
     **kwargs,
@@ -31,7 +32,8 @@ def visualize_layout_tv(
 
     assert len(layout_tv.shape) == 2
     assert len(layout_tv.stride) == 2
-    inverse_tv = make_inverse_tv(layout_tv, maybe_duplicates=False)
+    if inverse_tv is None:
+        inverse_tv = make_inverse_tv(layout_tv, maybe_duplicates=False)
 
     def color_map(index: int) -> tuple[float, float, float, float]:
         _, _, thr_idx, val_idx = inverse_tv[index]
@@ -63,6 +65,7 @@ def visualize_layout_tv(
 def visualize_layout_tv_maybe_duplicates(
     tiler_mn: TilerMN,
     layout_tv: Layout,
+    inverse_tv: dict[int, list[InverseTVEntry]] | None = None,
     use_alpha: bool = False,
     use_index: bool = False,
     **kwargs,
@@ -70,7 +73,8 @@ def visualize_layout_tv_maybe_duplicates(
 
     assert len(layout_tv.shape) == 2
     assert len(layout_tv.stride) == 2
-    inverse_tv = make_inverse_tv(layout_tv, maybe_duplicates=True)
+    if inverse_tv is None:
+        inverse_tv = make_inverse_tv(layout_tv, maybe_duplicates=True)
 
     def color_map(index: int) -> tuple[float, float, float, float]:
         if len(inverse_tv[index]) == 0:
