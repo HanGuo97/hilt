@@ -1,6 +1,10 @@
 import cutlass
 import cutlass.cute as cute
 
+__all__ = [
+    "idx2crd",
+]
+
 
 @cute.jit
 def idx2crd(idx: int, shape: tuple[int, ...]) -> tuple[int, ...]:
