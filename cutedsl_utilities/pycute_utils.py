@@ -18,6 +18,7 @@ from pycute.int_tuple import (
     crd2idx,
     crd2crd,
     has_none,
+    prefix_product,
 )
 from pycute.layout import (
     Layout,
@@ -46,6 +47,7 @@ __all__ = [
     "coalesce",
     "is_tuple",
     "make_layout",
+    "prefix_product",
     "visualize_layout",
 ]
 
