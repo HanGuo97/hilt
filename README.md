@@ -37,6 +37,8 @@ layout2.visualize(dpi=200)
 layout3.visualize(dpi=200)
 layout4.visualize(dpi=200)
 ```
+For example, visualizing `layout2` produces:
+<img src="images/layout-example.png" width="50%" alt="Example">
 
 Eager-mode also supports Tensor operations (SSA), though with some limitations.
 ```python
@@ -51,7 +53,6 @@ cute_fragment = cute.make_fragment_like(cute_tensor, cute.Float16)
 # tensor_value<vector<105xf16> o (7, 15)>
 cute_ssatensor = cute_fragment.load()
 ```
-<img src="images/layout-example.png" width="50%" alt="Example">
 
 
 ## Profile-Kernel
