@@ -2,7 +2,7 @@ import cutlass
 import cutlass.cute as cute
 import matplotlib.pyplot as plt
 from typing import Any, NamedTuple, Self
-from cutedsl_utilities.pycute_utils import (
+from ..pycute_utils import (
     visualize_layout,
     Layout as PyCuTeLayout,
 )

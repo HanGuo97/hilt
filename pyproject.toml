@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cutedsl_utilities"
+name = "hilt"
 dynamic = ["version", "description", "readme", "dependencies", "urls"]
 
 [project.scripts]

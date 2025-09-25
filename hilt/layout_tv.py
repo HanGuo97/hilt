@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from collections import defaultdict
-from cutedsl_utilities.pycute_utils import (
+from .pycute_utils import (
     Layout,
     idx2crd,
     crd2idx,

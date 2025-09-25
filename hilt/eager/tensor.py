@@ -3,8 +3,8 @@ import cutlass
 import cutlass.torch
 import cutlass.cute as cute
 from typing import Any, NamedTuple, Self
-from cutedsl_utilities.dtype_utils import get_dtype
-from cutedsl_utilities.pycute_utils import product
+from ..dtype_utils import get_dtype
+from ..pycute_utils import product
 from .base import CuTeEager
 
 CuTeTensorType = cute.runtime._Tensor | cute.core._Tensor

@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-LIBRARY_NAME = "cutedsl_utilities"
+LIBRARY_NAME = "hilt"
 
 
 setup(
@@ -11,5 +11,5 @@ setup(
     description="CuTeDSL Utilities",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/HanGuo97/cutedsl-utilities",
+    url="https://github.com/HanGuo97/hilt",
 )
