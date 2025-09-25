@@ -38,6 +38,7 @@ layout3.visualize(dpi=200)
 layout4.visualize(dpi=200)
 ```
 For example, visualizing `layout2` produces:
+
 <img src="images/layout-example.png" width="50%" alt="Example">
 
 Eager-mode also supports Tensor operations (SSA), though with some limitations.
