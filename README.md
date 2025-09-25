@@ -51,7 +51,7 @@ cute_fragment = cute.make_fragment_like(cute_tensor, cute.Float16)
 # tensor_value<vector<105xf16> o (7, 15)>
 cute_ssatensor = cute_fragment.load()
 ```
-![Example](images/layout-example.png)
+<img src="images/layout-example.png" width="50%" alt="Example">
 
 
 ## Profile-Kernel
