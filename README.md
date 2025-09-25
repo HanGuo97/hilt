@@ -15,10 +15,8 @@ Hilt provides eager-mode-like execution of (some) CuTeDSL instructions. While ru
 The primary use case (for myself) is prototyping layout algebra operations. Hilt also includes a fully Python-based layout visualization tool inspired by Horace's [visualizer](#1).
 
 ```diff
-import torch
 - import cutlass.cute as cute
 + import hilt.eager.api as cute
-from hilt.eager.tensor import from_torch
 ```
 
 ```python
@@ -42,6 +40,9 @@ layout4.visualize(dpi=200)
 
 Eager-mode also supports Tensor operations (SSA), though with some limitations.
 ```python
+import torch
+from hilt.eager.tensor import from_torch
+
 tensor = torch.randn(7, 15, dtype=torch.bfloat16)
 # tensor<ptr<bf16, gmem> o (7,15):(15,1)>
 cute_tensor = from_torch(tensor, memspace="gmem")
@@ -50,7 +51,7 @@ cute_fragment = cute.make_fragment_like(cute_tensor, cute.Float16)
 # tensor_value<vector<105xf16> o (7, 15)>
 cute_ssatensor = cute_fragment.load()
 ```
-![Example](images/layout-tv-example.png)
+![Example](images/layout-example.png)
 
 
 ## Profile-Kernel
