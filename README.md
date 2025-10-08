@@ -12,7 +12,7 @@ pip install -e .
 
 Hilt provides eager-mode-like execution of (some) CuTeDSL instructions. While runtime values are dummy placeholders, this feature serves as a useful meta-programming tool by JIT-compiling every instructions and handling data structure serialization/deserialization.
 
-The primary use case (for myself) is prototyping layout algebra operations. Hilt also includes a fully Python-based layout visualization tool inspired by Horace's [visualizer](#1).
+The primary use case (for myself) is prototyping layout algebra operations. Hilt also includes a fully Python-based layout visualization tool inspired by Horace's [visualizer](https://github.com/HanGuo97/hilt/issues/1).
 
 ```diff
 - import cutlass.cute as cute
