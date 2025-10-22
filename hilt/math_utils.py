@@ -71,6 +71,26 @@ def make_tensorssa_fn_from_scalar_fn(
     return _tensorssa_fn
 
 
+def make_tensorssa_fn_from_scalar_fn_different_dtype(
+    fn_scalar: Callable[[Scalar], Scalar],
+    dtype: type[cute.Numeric],
+) -> Callable[[cute.TensorSSA], cute.TensorSSA]:
+    # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
+
+    @cute.jit
+    def _tensorssa_fn(x: cute.TensorSSA) -> cute.TensorSSA:
+        tensor_x = cute.make_fragment(x.shape, x.dtype)
+        tensor_y = cute.make_fragment(x.shape, dtype)
+        tensor_x.store(x)
+
+        for i in cutlass.range_constexpr(cute.size(x.shape)):
+            tensor_y[i] = fn_scalar(tensor_x[i])
+
+        return tensor_y.load()
+
+    return _tensorssa_fn
+
+
 exp2 = make_dispatch_function(
     fn_tensorssa=cute.math.exp2,
     fn_scalar=cute.arch.exp2,
