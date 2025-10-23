@@ -20,32 +20,42 @@ LOGE_2 = math.log(2.0)
 
 
 def make_dispatch_function(
-    fn_tensor: Callable[[cute.Tensor], cute.Tensor] | None = None,
-    fn_tensorssa: Callable[[cute.TensorSSA], cute.TensorSSA] | None = None,
-    fn_scalar: Callable[[Scalar], Scalar] | None = None,
-) -> Callable[[Tensor], Tensor]:
-    """Creates a function that dispatches to appropriate function based on input type.
-    
+    fn_tensor: Callable | None = None,
+    fn_tensorssa: Callable | None = None,
+    fn_scalar: Callable | None = None,
+    dispatch_policy: str | None = None,
+) -> Callable:
+    """Creates a function that dispatches to appropriate function based on input types.
+
     :param fn_tensor: function to call for cute.Tensor inputs
-    :param fn_tensorssa: function to call for cute.TensorSSA inputs  
+    :param fn_tensorssa: function to call for cute.TensorSSA inputs
     :param fn_scalar: function to call for scalar inputs
+    :param dispatch_policy: dispatching strategy
     :return: dispatcher function
     """
+    if dispatch_policy is None:
+        dispatch_policy = "first"
 
-    def _dispatcher(x: Tensor) -> Tensor:
-        if cutlass.const_expr(isinstance(x, cute.Tensor)):
+    def _dispatcher(*args, **kwargs) -> object:
+        if cutlass.const_expr(dispatch_policy == "first"):
+            if cutlass.const_expr(len(args) > 0):
+                dispatch_arg = args[0]
+            else:
+                raise ValueError
+
+        if cutlass.const_expr(isinstance(dispatch_arg, cute.Tensor)):
             if cutlass.const_expr(fn_tensor is not None):
-                return fn_tensor(x)
+                return fn_tensor(*args, **kwargs)
             else:
                 raise NotImplementedError
-        if cutlass.const_expr(isinstance(x, cute.TensorSSA)):
+        if cutlass.const_expr(isinstance(dispatch_arg, cute.TensorSSA)):
             if cutlass.const_expr(fn_tensorssa is not None):
-                return fn_tensorssa(x)
+                return fn_tensorssa(*args, **kwargs)
             else:
                 raise NotImplementedError
-        if cutlass.const_expr(isinstance(x, Scalar)):
+        if cutlass.const_expr(isinstance(dispatch_arg, Scalar)):
             if cutlass.const_expr(fn_scalar is not None):
-                return fn_scalar(x)
+                return fn_scalar(*args, **kwargs)
             else:
                 raise NotImplementedError
         raise NotImplementedError
