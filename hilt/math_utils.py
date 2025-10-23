@@ -64,7 +64,7 @@ def make_dispatch_function(
 
 
 def make_tensorssa_fn_from_scalar_fn(
-    fn_scalar: Callable[[Scalar], Scalar],
+    fn_scalar: Callable[[object], Scalar],
     variadic_policy: str | None = None,
 ) -> Callable[[object], cute.TensorSSA]:
     # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
@@ -81,6 +81,7 @@ def make_tensorssa_fn_from_scalar_fn(
             else:
                 raise ValueError
 
+        assert cutlass.const_expr(isinstance(x, cute.TensorSSA))
         res = cute.make_fragment(x.shape, x.dtype)
         res.store(x)
 
@@ -93,19 +94,31 @@ def make_tensorssa_fn_from_scalar_fn(
 
 
 def make_tensorssa_fn_from_scalar_fn_different_dtype(
-    fn_scalar: Callable[[Scalar], Scalar],
+    fn_scalar: Callable[[object], Scalar],
     dtype: type[cute.Numeric],
-) -> Callable[[cute.TensorSSA], cute.TensorSSA]:
+    variadic_policy: str | None = None,
+) -> Callable[[object], cute.TensorSSA]:
     # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
 
+    if variadic_policy is None:
+        variadic_policy = "first"
+
     @cute.jit
-    def _tensorssa_fn(x: cute.TensorSSA) -> cute.TensorSSA:
+    def _tensorssa_fn(*args, **kwargs) -> cute.TensorSSA:
+        if cutlass.const_expr(variadic_policy == "first"):
+            if cutlass.const_expr(len(args) > 0):
+                x = args[0]
+                extra_args = args[1:]
+            else:
+                raise ValueError
+
+        assert cutlass.const_expr(isinstance(x, cute.TensorSSA))
         tensor_x = cute.make_fragment(x.shape, x.dtype)
         tensor_y = cute.make_fragment(x.shape, dtype)
         tensor_x.store(x)
 
         for i in cutlass.range_constexpr(cute.size(x.shape)):
-            tensor_y[i] = fn_scalar(tensor_x[i])
+            tensor_y[i] = fn_scalar(tensor_x[i], *extra_args, **kwargs)
 
         return tensor_y.load()
 
