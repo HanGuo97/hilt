@@ -65,44 +65,6 @@ def make_dispatch_function(
 
 def make_tensorssa_fn_from_scalar_fn(
     fn_scalar: Callable[[Scalar], Scalar],
-) -> Callable[[cute.TensorSSA], cute.TensorSSA]:
-    # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
-
-    @cute.jit
-    def _tensorssa_fn(x: cute.TensorSSA) -> cute.TensorSSA:
-        res = cute.make_fragment(x.shape, x.dtype)
-        res.store(x)
-
-        for i in cutlass.range_constexpr(cute.size(x.shape)):
-            res[i] = fn_scalar(res[i])
-
-        return res.load()
-
-    return _tensorssa_fn
-
-
-def make_tensorssa_fn_from_scalar_fn_different_dtype(
-    fn_scalar: Callable[[Scalar], Scalar],
-    dtype: type[cute.Numeric],
-) -> Callable[[cute.TensorSSA], cute.TensorSSA]:
-    # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
-
-    @cute.jit
-    def _tensorssa_fn(x: cute.TensorSSA) -> cute.TensorSSA:
-        tensor_x = cute.make_fragment(x.shape, x.dtype)
-        tensor_y = cute.make_fragment(x.shape, dtype)
-        tensor_x.store(x)
-
-        for i in cutlass.range_constexpr(cute.size(x.shape)):
-            tensor_y[i] = fn_scalar(tensor_x[i])
-
-        return tensor_y.load()
-
-    return _tensorssa_fn
-
-
-def make_tensorssa_fn_from_scalar_fn_variadic(
-    fn_scalar: Callable[[Scalar], Scalar],
     variadic_policy: str | None = None,
 ) -> Callable[[object], cute.TensorSSA]:
     # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
@@ -126,6 +88,26 @@ def make_tensorssa_fn_from_scalar_fn_variadic(
             res[i] = fn_scalar(res[i], *extra_args, **kwargs)
 
         return res.load()
+
+    return _tensorssa_fn
+
+
+def make_tensorssa_fn_from_scalar_fn_different_dtype(
+    fn_scalar: Callable[[Scalar], Scalar],
+    dtype: type[cute.Numeric],
+) -> Callable[[cute.TensorSSA], cute.TensorSSA]:
+    # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
+
+    @cute.jit
+    def _tensorssa_fn(x: cute.TensorSSA) -> cute.TensorSSA:
+        tensor_x = cute.make_fragment(x.shape, x.dtype)
+        tensor_y = cute.make_fragment(x.shape, dtype)
+        tensor_x.store(x)
+
+        for i in cutlass.range_constexpr(cute.size(x.shape)):
+            tensor_y[i] = fn_scalar(tensor_x[i])
+
+        return tensor_y.load()
 
     return _tensorssa_fn
 
