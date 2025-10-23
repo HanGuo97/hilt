@@ -20,11 +20,11 @@ LOGE_2 = math.log(2.0)
 
 
 def make_dispatch_function(
-    fn_tensor: Callable | None = None,
-    fn_tensorssa: Callable | None = None,
-    fn_scalar: Callable | None = None,
+    fn_tensor: Callable[[object], cute.Tensor] | None = None,
+    fn_tensorssa: Callable[[object], cute.TensorSSA] | None = None,
+    fn_scalar: Callable[[object], Scalar] | None = None,
     dispatch_policy: str | None = None,
-) -> Callable:
+) -> Callable[[object], Tensor]:
     """Creates a function that dispatches to appropriate function based on input types.
 
     :param fn_tensor: function to call for cute.Tensor inputs
@@ -36,7 +36,7 @@ def make_dispatch_function(
     if dispatch_policy is None:
         dispatch_policy = "first"
 
-    def _dispatcher(*args, **kwargs) -> object:
+    def _dispatcher(*args, **kwargs) -> Tensor:
         if cutlass.const_expr(dispatch_policy == "first"):
             if cutlass.const_expr(len(args) > 0):
                 dispatch_arg = args[0]
@@ -97,6 +97,35 @@ def make_tensorssa_fn_from_scalar_fn_different_dtype(
             tensor_y[i] = fn_scalar(tensor_x[i])
 
         return tensor_y.load()
+
+    return _tensorssa_fn
+
+
+def make_tensorssa_fn_from_scalar_fn_variadic(
+    fn_scalar: Callable[[Scalar], Scalar],
+    variadic_policy: str | None = None,
+) -> Callable[[object], cute.TensorSSA]:
+    # https://github.com/NVIDIA/cutlass/blob/main/examples/python/CuTeDSL/ampere/flash_attention_v2.py
+
+    if variadic_policy is None:
+        variadic_policy = "first"
+
+    @cute.jit
+    def _tensorssa_fn(*args, **kwargs) -> cute.TensorSSA:
+        if cutlass.const_expr(variadic_policy == "first"):
+            if cutlass.const_expr(len(args) > 0):
+                x = args[0]
+                extra_args = args[1:]
+            else:
+                raise ValueError
+
+        res = cute.make_fragment(x.shape, x.dtype)
+        res.store(x)
+
+        for i in cutlass.range_constexpr(cute.size(x.shape)):
+            res[i] = fn_scalar(res[i], *extra_args, **kwargs)
+
+        return res.load()
 
     return _tensorssa_fn
 
