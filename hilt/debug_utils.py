@@ -63,8 +63,10 @@ def print_tensorssa(tensor: cute.TensorSSA, tid: int = 0, bid: int = 0) -> None:
 
 
 @cute.jit
-def runtime_print(x: cute.Tensor | cute.TensorSSA | object, tid: int = 0, bid: int = 0) -> None:
-    if cutlass.const_expr(isinstance(x, cute.Tensor)):
+def runtime_print(x: cute.Tensor | cute.TensorSSA | str | object, tid: int = 0, bid: int = 0) -> None:
+    if cutlass.const_expr(isinstance(x, str)):
+        printf(x, tid=tid, bid=bid)
+    elif cutlass.const_expr(isinstance(x, cute.Tensor)):
         print_tensor(x, tid=tid, bid=bid)
     elif cutlass.const_expr(isinstance(x, cute.TensorSSA)):
         print_tensorssa(x, tid=tid, bid=bid)
